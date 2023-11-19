@@ -21,6 +21,7 @@ namespace SimpleTweaksPlugin.Tweaks.UiAdjustment;
 [Changelog("1.8.3.1", "Add TopRight option for displaying countdown")]
 [Changelog("1.8.9.0", "Add option to disable on primary target")]
 [Changelog("1.9.2.1", "Fix updating slowly for really slow castbars")]
+[Changelog(UnreleasedVersion, "Fix a crash when changing settings")]
 public unsafe class TargetCastbarCountdown : UiAdjustments.SubTweak {
     private uint CastBarTextNodeId => CustomNodes.Get(this, "Countdown");
 
@@ -79,6 +80,7 @@ public unsafe class TargetCastbarCountdown : UiAdjustments.SubTweak {
             foreach (var direction in Enum.GetValues<NodePosition>()) {
                 if (ImGui.Selectable(direction.ToString(), setting == direction)) {
                     setting = direction;
+                    ImGui.EndCombo();
                     return true;
                 }
             }
