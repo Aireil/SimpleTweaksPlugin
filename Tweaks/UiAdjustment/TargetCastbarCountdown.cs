@@ -2,6 +2,7 @@
 using System;
 using System.Numerics;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
+using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
@@ -142,10 +143,11 @@ public unsafe class TargetCastbarCountdown : UiAdjustments.SubTweak {
     private void UpdateIcons(bool castBarVisible, AtkUnitBase* parent, GameObject? target, AtkResNode* positioningNode, bool focusTarget) {
         var textNode = Common.GetNodeByID<AtkTextNode>(&parent->UldManager, CastBarTextNodeId);
         if (textNode is null) return;
-        
-        if (target as BattleChara is { IsCasting: true } targetInfo && castBarVisible && targetInfo.TotalCastTime > targetInfo.CurrentCastTime) {
+
+        var targetChar = (FFXIVClientStructs.FFXIV.Client.Game.Character.Character*)target?.Address;
+        if (target?.ObjectKind is ObjectKind.BattleNpc or ObjectKind.Player && targetChar != null && castBarVisible && targetChar->GetCastInfo()->AdjustedTotalCastTime > targetChar->GetCastInfo()->CurrentCastTime) {
             textNode->AtkResNode.ToggleVisibility(true);
-            textNode->SetText($"{targetInfo.TotalCastTime - targetInfo.CurrentCastTime:00.00}");
+            textNode->SetText($"{targetChar->GetCastInfo()->AdjustedTotalCastTime - targetChar->GetCastInfo()->CurrentCastTime:00.00}");
             textNode->FontSize = (byte) Math.Clamp(focusTarget ? TweakConfig.FocusFontSize : TweakConfig.FontSize, 8, 30);
             
             var nodePosition = (focusTarget ? TweakConfig.FocusTargetPosition : TweakConfig.CastbarPosition) switch {
